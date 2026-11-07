@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 
 String get apiUrl {
-  if (kIsWeb) return 'http://localhost:5000';
+  if (kIsWeb) return 'http://localhost:5001';
   if (defaultTargetPlatform == TargetPlatform.android) {
-    return 'http://127.0.0.1:5000'; 
-    // return 'http://10.0.2.2:5000'; // Default for Android Emulator
+    return 'http://127.0.0.1:5001'; 
+    // return 'http://10.0.2.2:5001'; // Default for Android Emulator
   }
-  return 'http://127.0.0.1:5000';
+  return 'http://127.0.0.1:5001';
 }
 
 String get frontendUrl {

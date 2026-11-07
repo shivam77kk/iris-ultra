@@ -58,6 +58,7 @@ export async function handleAIChat(req, res, next) {
 
     const startTime = Date.now();
     const trackingId = userId ? userId.toString() : (sessionId || 'demo-session-id');
+    const effectiveSessionId = sessionId || trackingId || 'default-session';
     
     // Moving Train Step 1: Query Received
     emitRoutingEvent(trackingId, {
@@ -175,7 +176,7 @@ export async function handleAIChat(req, res, next) {
       await recordBlockedCall(trackingId);
       
       await SecurityLog.create({
-        sessionId,
+        sessionId: effectiveSessionId,
         userId,
         promptSnippet: message.substring(0, 200),
         threatLevel: 'blocked',
@@ -366,7 +367,7 @@ export async function handleAIChat(req, res, next) {
       await recordBlockedCall(sessionId);
 
       await SecurityLog.create({
-        sessionId,
+        sessionId: effectiveSessionId,
         userId,
         promptSnippet: message.substring(0, 200),
         threatLevel: 'blocked',
@@ -388,7 +389,7 @@ export async function handleAIChat(req, res, next) {
     // 8. Log suspicious events that were monitored but passed
     if (injectionStatus === 'monitor') {
       await SecurityLog.create({
-        sessionId,
+        sessionId: effectiveSessionId,
         userId,
         promptSnippet: message.substring(0, 200),
         threatLevel: 'suspicious',

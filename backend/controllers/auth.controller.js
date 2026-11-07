@@ -65,8 +65,13 @@ export async function register(req, res, next) {
 
 export async function verifyOTP(req, res, next) {
   try {
-    const { userId, otp } = req.body;
-    const user = await User.findById(userId);
+    const { userId, email, otp } = req.body;
+    let user;
+    if (userId) {
+      user = await User.findById(userId);
+    } else if (email) {
+      user = await User.findOne({ email });
+    }
 
     if (!user) return res.status(404).json({ error: 'User not found' });
     if (user.isVerified) return res.status(400).json({ error: 'Already verified' });
@@ -185,8 +190,13 @@ export async function sendLoginOTP(req, res, next) {
 
 export async function verifyLoginOTP(req, res, next) {
   try {
-    const { userId, otp } = req.body;
-    const user = await User.findById(userId);
+    const { userId, email, otp } = req.body;
+    let user;
+    if (userId) {
+      user = await User.findById(userId);
+    } else if (email) {
+      user = await User.findOne({ email });
+    }
 
     if (!user) return res.status(404).json({ error: 'User not found' });
     if (user.otp !== otp) return res.status(400).json({ error: 'Invalid OTP' });

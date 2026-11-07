@@ -1200,10 +1200,121 @@ export class GestureEngine {
     this.boneNodes = {};
     this.currentPose = {};
     this.activeGesture = null;
+    this.activeGestureName = null;
     this.gestureTimer = 0;
     this.gestureQueue = [];
     this.initialized = false;
     this.isMobile = false;
     this.isVrm = false;
+  }
 
-    
+  init(vrm, scene, isMobile = false) {
+    this.isMobile = isMobile;
+    this.boneNodes = {};
+
+    if (vrm && vrm.humanoid) {
+      this.isVrm = true;
+      for (const [key, vrmBoneName] of Object.entries(VRM_BONE_MAP)) {
+        const bone = vrm.humanoid.getNormalizedBoneNode(vrmBoneName);
+        if (bone) {
+          this.boneNodes[key] = bone;
+        }
+      }
+    } else if (scene) {
+      this.isVrm = false;
+      scene.traverse((node) => {
+        if (node.isBone) {
+          this.boneNodes[node.name] = node;
+        }
+      });
+    }
+
+    this.initialized = true;
+  }
+
+  isGestureActive() {
+    return this.activeGesture !== null;
+  }
+
+  setGesture(gestureName) {
+    if (!gestureName || !this.gestures[gestureName]) {
+      this.activeGesture = null;
+      this.activeGestureName = null;
+      this.gestureTimer = 0;
+      return;
+    }
+    this.activeGesture = this.gestures[gestureName];
+    this.activeGestureName = gestureName;
+    this.gestureTimer = 0;
+  }
+
+  queueGestures(gestureArray) {
+    if (!Array.isArray(gestureArray)) return;
+    for (const g of gestureArray) {
+      if (this.gestures[g]) {
+        this.gestureQueue.push(g);
+      }
+    }
+  }
+
+  clearQueue() {
+    this.gestureQueue = [];
+  }
+
+  update(t, delta) {
+    if (!this.initialized || !this.activeGesture) return;
+
+    this.gestureTimer += delta;
+    const duration = this.activeGesture.duration || 2.0;
+    const speed = this.activeGesture.transitionSpeed || 6;
+
+    // Apply gesture bone rotations
+    if (this.activeGesture.bones) {
+      for (const [boneKey, rot] of Object.entries(this.activeGesture.bones)) {
+        const node = this.boneNodes[boneKey];
+        if (node && rot.axis) {
+          const axisVec = new this.THREE.Vector3(...rot.axis);
+          const targetQ = new this.THREE.Quaternion().setFromAxisAngle(axisVec, rot.angle);
+          node.quaternion.slerp(targetQ, Math.min(1, delta * speed));
+        }
+      }
+    }
+
+    // Apply finger gestures
+    if (this.activeGesture.fingers) {
+      for (const [boneKey, rot] of Object.entries(this.activeGesture.fingers)) {
+        const node = this.boneNodes[boneKey];
+        if (node && rot.axis) {
+          const axisVec = new this.THREE.Vector3(...rot.axis);
+          const targetQ = new this.THREE.Quaternion().setFromAxisAngle(axisVec, rot.angle);
+          node.quaternion.slerp(targetQ, Math.min(1, delta * speed));
+        }
+      }
+    }
+
+    // Apply oscillations if any
+    if (this.activeGesture.oscillation) {
+      for (const [boneKey, osc] of Object.entries(this.activeGesture.oscillation)) {
+        const node = this.boneNodes[boneKey];
+        if (node && osc.axis) {
+          const sinVal = Math.sin(t * osc.frequency * Math.PI * 2) * osc.amplitude;
+          const axisVec = new this.THREE.Vector3(...osc.axis);
+          const oscQ = new this.THREE.Quaternion().setFromAxisAngle(axisVec, sinVal);
+          node.quaternion.multiply(oscQ);
+        }
+      }
+    }
+
+    if (this.gestureTimer >= duration) {
+      if (this.gestureQueue.length > 0) {
+        const next = this.gestureQueue.shift();
+        this.setGesture(next);
+      } else {
+        this.activeGesture = null;
+        this.activeGestureName = null;
+        this.gestureTimer = 0;
+      }
+    }
+  }
+}
+
