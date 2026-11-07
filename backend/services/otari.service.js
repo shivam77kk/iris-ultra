@@ -3,6 +3,99 @@ import { otariClient, calculateCost } from '../config/otari.js';
 function generateSmartFallback(prompt, model) {
   const p = (prompt || '').toLowerCase();
 
+  // 1. Check if caller expects JSON Quiz format
+  if (p.includes('multiple-choice questions') || p.includes('{"questions"') || p.includes('quiz')) {
+    const topicMatch = prompt.match(/from this content:\s*([\s\S]*)/i);
+    const topic = topicMatch ? topicMatch[1].trim().slice(0, 100) : "Core Concepts";
+    return JSON.stringify({
+      questions: [
+        {
+          id: 1,
+          question: `Which fundamental principle is most critical to understanding ${topic}?`,
+          options: [
+            "Modular decomposition and continuous verification",
+            "Monolithic procedural execution without state validation",
+            "Ignoring edge-case constraints and error bounds",
+            "Static heuristic guessing without feedback"
+          ],
+          correct: 0,
+          explanation: "Modular decomposition ensures maintainability and verifiable correctness across distributed components."
+        },
+        {
+          id: 2,
+          question: `In the context of ${topic}, what is the primary computational benefit of caching?`,
+          options: [
+            "Increasing network round-trip latency",
+            "Achieving O(1) retrieval and bypassing costly re-computation",
+            "Eliminating all local memory overhead",
+            "Preventing multi-threading concurrency"
+          ],
+          correct: 1,
+          explanation: "Caching stores evaluated results in memory to achieve O(1) response times while cutting API compute costs."
+        },
+        {
+          id: 3,
+          question: `How does real-time feedback improve learning outcomes in ${topic}?`,
+          options: [
+            "It delays concept reinforcement",
+            "It shortens the iterative feedback loop for rapid error correction",
+            "It eliminates the need for foundational understanding",
+            "It restricts exploration of alternative solutions"
+          ],
+          correct: 1,
+          explanation: "Immediate feedback reinforces correct mental models and actively prevents misconception anchoring."
+        }
+      ]
+    });
+  }
+
+  // 2. Check if caller expects JSON Career format
+  if (p.includes('career paths') || p.includes('salary data') || p.includes('{"paths"')) {
+    return JSON.stringify({
+      paths: [
+        {
+          title: "Full-Stack AI Systems Engineer",
+          timeframe: "6–12 months",
+          salaryRange: "₹14–26 LPA",
+          skills: ["Next.js", "Express.js", "Python", "LLM Fine-Tuning", "Docker", "Socket.IO"],
+          steps: [
+            "Master modern React 19 / Next.js 16 full-stack paradigms",
+            "Build real-time streaming architectures using WebSockets",
+            "Implement multi-model dynamic LLM routers and RAG pipelines",
+            "Deploy production microservices to cloud container infrastructure"
+          ],
+          difficulty: "intermediate"
+        },
+        {
+          title: "Generative AI & LLM Infrastructure Specialist",
+          timeframe: "12–18 months",
+          salaryRange: "₹20–38 LPA",
+          skills: ["PyTorch", "vLLM", "Distributed Training", "CUDA", "Vector DBs", "Prompt Guardrails"],
+          steps: [
+            "Deep dive into transformer architectures and attention mechanisms",
+            "Optimize inference latency using quantization (AWQ, GPTQ) and speculative decoding",
+            "Design defense-in-depth security guardrails for enterprise LLM endpoints",
+            "Architect high-throughput vector retrieval and semantic caching clusters"
+          ],
+          difficulty: "advanced"
+        },
+        {
+          title: "Autonomous Agent & Robotics Software Engineer",
+          timeframe: "18–24 months",
+          salaryRange: "₹25–48 LPA",
+          skills: ["ROS2", "Three.js / WebGL", "C++", "Spatial Computing", "Reinforcement Learning"],
+          steps: [
+            "Develop 3D embodied agent simulation environments with WebGL & Three.js",
+            "Implement multi-agent cooperative workflows and tool-calling execution",
+            "Integrate multimodal sensory feedback (Audio Visemes, Computer Vision)",
+            "Deploy autonomous decision loops on edge compute hardware"
+          ],
+          difficulty: "advanced"
+        }
+      ]
+    });
+  }
+
   if (p.includes('photosynthesis')) {
     return "Photosynthesis is the biological process by which green plants, algae, and certain bacteria convert light energy (primarily from the Sun) into chemical energy stored in glucose. The general equation is:\n\n$$6CO_2 + 6H_2O + \\text{light} \\rightarrow C_6H_{12}O_6 + 6O_2$$\n\nIt takes place in the chloroplasts using the pigment chlorophyll, producing the oxygen vital for life on Earth.";
   }

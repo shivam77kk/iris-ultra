@@ -29,15 +29,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final auth = context.read<AuthProvider>();
 
     try {
-      final data = await auth.register(
+      await auth.register(
         _nameCtrl.text, _emailCtrl.text, _passwordCtrl.text);
       if (!mounted) return;
-      if (data['userId'] != null) {
-        Navigator.pushReplacementNamed(context, '/verify-otp',
-            arguments: data['userId'].toString());
-      } else {
-        Navigator.pushReplacementNamed(context, '/dashboard');
-      }
+      Navigator.pushReplacementNamed(context, '/dashboard');
     } on ApiException catch (e) {
       setState(() => _error = e.message);
     } catch (e) {

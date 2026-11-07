@@ -32,14 +32,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       if (_mode == 'password') {
-        final data = await auth.login(_emailCtrl.text, _passwordCtrl.text);
+        await auth.login(_emailCtrl.text, _passwordCtrl.text);
         if (!mounted) return;
-        if (data['userId'] != null && data['user'] == null) {
-          Navigator.pushReplacementNamed(context, '/verify-otp',
-              arguments: data['userId'].toString());
-        } else {
-          Navigator.pushReplacementNamed(context, '/dashboard');
-        }
+        Navigator.pushReplacementNamed(context, '/dashboard');
       } else if (_mode == 'otp_request') {
         final data = await auth.sendLoginOTP(_emailCtrl.text);
         _userId = data['userId']?.toString();

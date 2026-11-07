@@ -27,11 +27,10 @@ export default function RegisterPage() {
         setError(data.error || 'Registration failed');
         return;
       }
-      if (data.userId) {
-        router.push(`/verify-otp?userId=${data.userId}`);
-      } else {
-        router.push('/login');
+      if (data.token) {
+        localStorage.setItem('iris_token', data.token);
       }
+      router.push('/dashboard');
     } catch {
       setError('Network error. Please try again.');
     } finally {

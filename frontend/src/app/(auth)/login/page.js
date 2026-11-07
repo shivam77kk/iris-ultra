@@ -30,12 +30,11 @@ export default function LoginPage() {
         });
         const data = await res.json();
         if (!res.ok) {
-          if (data.userId) {
-            router.push(`/verify-otp?userId=${data.userId}`);
-          } else {
-            setError(data.error || 'Login failed');
-          }
+          setError(data.error || 'Login failed');
           return;
+        }
+        if (data.token) {
+          localStorage.setItem('iris_token', data.token);
         }
         router.push('/dashboard');
       } else if (mode === 'otp_request') {
