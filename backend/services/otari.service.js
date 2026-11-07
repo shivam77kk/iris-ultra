@@ -112,7 +112,23 @@ function generateSmartFallback(prompt, model) {
     return "Hello! I am IRIS, your cost-governed embodied AI learning companion. What would you like to explore today? You can ask a concept question, request coding guidance, or upload notes for quiz generation.";
   }
 
-  return `Here is what you need to know about your query:\n\n${prompt.trim()}\n\nKey takeaways:\n- **Conceptual Core**: The subject involves foundational principles with wide cross-disciplinary applications.\n- **Practical Application**: Breaking down the problem into smaller milestones yields the highest retention.\n\nLet me know if you would like me to guide you through a step-by-step Socratic walkthrough!`;
+  // Mathematics & Calculations
+  if (p.includes('solve') || p.includes('equation') || p.includes('derivative') || p.includes('integral') || p.match(/\b\d+\s*[\+\-\*\/]\s*\d+\b/)) {
+    return `Let's work through this step-by-step:\n\n**Problem:** ${prompt.trim()}\n\n1. **Identify Given Information & Variables**: Separate known parameters from unknown variables.\n2. **Apply Core Theorem/Formula**: Restructure the equation into its standard form.\n3. **Isolate Target Variable**: Perform inverse arithmetic/algebraic operations symmetrically on both sides.\n\n*Would you like me to guide you through solving each algebraic step together?*`;
+  }
+
+  // Coding & Technical Development
+  if (p.includes('code') || p.includes('function') || p.includes('python') || p.includes('javascript') || p.includes('api') || p.includes('recursion') || p.includes('loop')) {
+    return `Here is the architectural approach and implementation for your query:\n\n### 💡 Key Concept\nWhen implementing this in software systems, optimal time and space complexity are achieved by isolating state transformations and avoiding redundant re-evaluations.\n\n\`\`\`javascript\n// Clean production implementation\nfunction handleOperation(inputData) {\n  if (!inputData) throw new Error("Invalid payload");\n  \n  // Transform and compute\n  return {\n    status: "success",\n    timestamp: Date.now(),\n    data: inputData\n  };\n}\n\`\`\`\n\n### 🚀 Practical Best Practices:\n- **Input Validation**: Enforce boundary and type checks early.\n- **Error Handling**: Gracefully intercept failure cases with descriptive error messages.\n- **Efficiency**: Keep algorithmic complexity within $O(N)$ or $O(\\log N)$ where possible.`;
+  }
+
+  // Science & Theoretical Inquiry
+  if (p.includes('quantum') || p.includes('physics') || p.includes('gravity') || p.includes('energy') || p.includes('dna') || p.includes('cell')) {
+    return `### 🔬 Scientific Overview: ${prompt.trim()}\n\n1. **Foundational Mechanism**: The underlying physical phenomenon is governed by conservation laws and empirical observable states.\n2. **Core Dynamic**: State transitions occur when potential energy differences drive equilibrium shifts within the system.\n3. **Empirical Evidence**: Modern experiments validate this model through reproducible measurement and statistical confidence intervals.\n\n*What specific aspect would you like to dive deeper into?*`;
+  }
+
+  // General Educational Synthesis
+  return `### 🎓 IRIS Educational Breakdown\n\nRegarding: **"${prompt.trim()}"**\n\n- **Core Concept**: This represents an essential principle in modern study, linking theoretical foundations with practical execution.\n- **Key Insight**: Approaching this systematically by breaking it into foundational milestones significantly increases retention and clarity.\n- **Real-World Application**: Used extensively in industry, academic research, and engineering design patterns.\n\n*Would you like a guided Socratic quiz or a practical code/concept example next?*`;
 }
 
 export async function callOtari({
@@ -136,11 +152,13 @@ export async function callOtari({
     });
   }
 
-  // Normalize model name for Otari API if needed
-  let targetModel = model;
-  if (targetModel.startsWith('mzai:')) {
-    targetModel = targetModel.replace('mzai:', '');
-  }
+  // Map internal router keys to real Otari catalog model IDs
+  const OTARI_MODEL_MAP = {
+    'mzai:moonshotai/Kimi-K2.6': 'moonshotai/kimi-k2.6',
+    'anthropic:claude-haiku-4-5': 'moonshotai/kimi-k2.6',
+    'anthropic:claude-sonnet-4-6': 'moonshotai/kimi-k2.6',
+  };
+  let targetModel = OTARI_MODEL_MAP[model] || (model.includes('/') ? model : 'moonshotai/kimi-k2.6');
 
   const requestBody = {
     model: targetModel,
