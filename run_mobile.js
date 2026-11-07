@@ -16,6 +16,7 @@ let reversed = false;
 setInterval(() => {
     try {
         const adbPath = process.env.LOCALAPPDATA + '\\Android\\Sdk\\platform-tools\\adb.exe';
+        execSync(`"${adbPath}" reverse tcp:5001 tcp:5001`, { stdio: 'ignore' });
         execSync(`"${adbPath}" reverse tcp:5000 tcp:5000`, { stdio: 'ignore' });
         execSync(`"${adbPath}" reverse tcp:3000 tcp:3000`, { stdio: 'ignore' });
         
