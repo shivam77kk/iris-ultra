@@ -1,4 +1,13 @@
 {
+  "name": "iris-ultra",
+  "version": "1.0.0",
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:mobile": "cd mobile && flutter run -d chrome --web-port 8080",
+    "tunnel:frontend": "npx localtunnel --port 3000",
+    "tunnel:backend": "npx localtunnel --port 5001"
+  },
   "dependencies": {
     "localtunnel": "^2.0.2"
   }
